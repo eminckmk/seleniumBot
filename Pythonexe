@@ -1,0 +1,188 @@
+from asyncio.windows_events import NULL
+from random import random
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.by import By 
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+import os, sys
+import time,requests
+from bs4 import BeautifulSoup
+delayTime = 2
+audioToTextDelay = 4
+filename = '2.mp3'
+from time import sleep
+
+googleIBMLink = 'https://(LINK)'
+option = webdriver.ChromeOptions()
+option.add_argument('--disable-notifications')
+option.add_argument('--user-data-dir=C:\\Users\\Emin\\AppData\\Local\\Google\\Chrome\\User Data')
+option.add_argument('--disable-blink-features=AutomationControlled')
+option.add_argument("--mute-audio")
+
+
+driver = webdriver.Chrome("C:\\(ChromeDriver.exe))")
+driver.get("https://f(LINK))")
+
+wallet = driver.find_element_by_xpath("/html/body/div[2]/div[2]/div/form/div/center/input");
+wallet.send_keys("KEY")
+    
+walletOk = driver.find_element_by_css_selector("body > div:nth-child(3) > div.col-md-6 > div > form > button");
+walletOk.click()
+
+    
+def audioToText(mp3Path): 
+
+            print("1")
+            driver.execute_script('''window.open("","_blank");''')
+            driver.switch_to.window(driver.window_handles[1])
+
+            print("2")
+            driver.get(googleIBMLink)
+            time.sleep(1)
+
+            print("3")
+            root = driver.find_element_by_id('root').find_elements_by_class_name('dropzone _container _container_large')
+            btn = driver.find_element(By.XPATH, '//*[@id="root"]/div/input')
+            btn.send_keys('C:/Users/Emin/python/2.mp3')
+            
+            print("4")
+            time.sleep(audioToTextDelay)
+
+            print("5")
+            text = driver.find_element(By.XPATH, '//*[@id="root"]/div/div[7]/div/div/div').find_elements_by_tag_name('span')
+
+            print("5.1")
+            result = " ".join( [ each.text for each in text ] )
+
+            print("6")
+            driver.close()
+            driver.switch_to.window(driver.window_handles[0])
+
+            print("7")
+            return result
+
+def saveFile(content,filename):
+            with open(filename, "wb") as handle:
+                for data in content.iter_content():
+                    handle.write(data)
+
+
+sleep(1)
+
+
+onayla = driver.find_element_by_css_selector("body > div:nth-child(3) > div.col-md-6 > div > form > button");
+onayla.click() 
+
+sleep(6)
+
+try:
+        if driver.window_handles[1] != 'null':
+
+            driver.switch_to.window(driver.window_handles[1])
+            driver.close(driver.switch_to.window(driver.window_handles[1]))
+
+
+            driver.switch_to.window(driver.window_handles[0])
+            onayla = driver.find_element_by_css_selector("body > div:nth-child(3) > div.col-md-6 > div > form > button");
+            onayla.click()
+            print("try a girdi")
+    
+            
+except:
+        print("except")     
+
+
+
+        time.sleep(1)
+        googleClass = driver.find_elements_by_class_name('g-recaptcha')[0]
+        time.sleep(1)
+        outeriframe = googleClass.find_element_by_tag_name('iframe')
+        time.sleep(1)
+        outeriframe.click()
+
+        sleep(6)
+
+        try:
+            if driver.window_handles[1] != 'null':
+
+                driver.switch_to.window(driver.window_handles[1])
+                driver.close(driver.switch_to.window(driver.window_handles[1]))
+
+
+                googleClass = driver.find_elements_by_class_name('g-recaptcha')[0]
+                time.sleep(1)
+                outeriframe = googleClass.find_element_by_tag_name('iframe')
+                time.sleep(1)
+                outeriframe.click()
+    
+            
+        except:
+            print("except")     
+
+
+
+
+        sleep(1)
+        allIframesLen = driver.find_elements_by_tag_name('iframe')
+        time.sleep(1)
+
+        audioBtnFound = False
+        audioBtnIndex = -1
+        for index in range(len(allIframesLen)):
+            driver.switch_to.default_content()
+            iframe = driver.find_elements_by_tag_name('iframe')[index]
+            driver.switch_to.frame(iframe)
+            driver.implicitly_wait(delayTime)
+            try:
+                audioBtn = driver.find_element_by_id('recaptcha-audio-button') or driver.find_element_by_id('recaptcha-anchor')
+                audioBtn.click()
+                audioBtnFound = True
+                audioBtnIndex = index
+                break
+            except Exception as e:
+                pass
+        if audioBtnFound:
+            try:
+                while True:
+                    href = driver.find_element_by_id('audio-source').get_attribute('src')
+                    response = requests.get(href, stream=True)
+                    saveFile(response,filename)
+                    response = audioToText(os.getcwd() + '/' + filename)
+                    print(response)
+                    driver.switch_to.default_content()
+                    iframe = driver.find_elements_by_tag_name('iframe')[audioBtnIndex]
+                    driver.switch_to.frame(iframe)
+                    inputbtn = driver.find_element_by_id('audio-response')
+                    inputbtn.send_keys(response)
+                    inputbtn.send_keys(Keys.ENTER)
+                    time.sleep(2)
+                    errorMsg = driver.find_elements_by_class_name('rc-audiochallenge-error-message')[0]
+                    if errorMsg.text == "" or errorMsg.value_of_css_property('display') == 'none':
+                        print("Success")
+
+                        break
+            except Exception as e:
+                print(e)
+            else:
+                print('true')
+
+        sleep(2)
+
+        driver.switch_to.window(driver.window_handles[0])
+        deneme = driver.find_element_by_xpath('/html/body/div[2]/div[2]/div/form/button')
+        deneme.click()
+
+        sleep(1)
+
+        anaSayfa = driver.find_element_by_css_selector("body > nav > div > div.navbar-header > a");
+        anaSayfa.click()
+
+        sleep(1)
+
+
+
+
+
+
